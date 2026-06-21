@@ -47,18 +47,18 @@ UPSTASH_REDIS_REST_TOKEN="your_upstash_redis_rest_token_here"
 
 ### 3. Database Setup (Migrations & Seed)
 
-This project uses Prisma. To initialize your database and push the schema:
+This project uses Prisma. To initialize your database, apply migrations, and generate the client:
 
 ```bash
 # Install dependencies
 npm install
 
-# Push the schema to the database
-npx prisma db push
+# Apply migrations to your database
+npx prisma migrate dev
 
-# (Optional) If you have a Prisma seed script configured for mock data:
-npx prisma db seed
-```
+# Generate Prisma Client
+npx prisma generate
+
 
 ### 4. Running Locally
 
@@ -69,6 +69,14 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. Click the chat widget in the bottom right to start interacting.
+
+### 5. Building for Production
+
+To build the application for deployment, run the following command which ensures the Prisma client is generated before the Next.js build:
+
+```bash
+npx prisma generate && npx next build
+```
 
 ---
 
