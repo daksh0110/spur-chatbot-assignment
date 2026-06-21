@@ -1,17 +1,16 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Message } from './types';
+import { getCookie, setCookie, deleteCookie } from '@/lib/cookies';
 
 export function useChat() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'welcome',
-      sender: 'bot',
-      text: 'Hi there! 👋 I am the E-commerce support agent. How can I help you today?',
-      timestamp: new Date().toISOString(),
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionId, setSessionIdState] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return getCookie('sessionId');
+    }
+    return null;
+  });
   const [error, setError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -23,6 +22,41 @@ export function useChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
+
+  const fetchMessages = useCallback(async (sid: string) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/chat/message?sessionId=${sid}`);
+      if (response.ok) {
+        const json = await response.json();
+        const historyData = json.data?.messages || [];
+        if (historyData.length > 0) {
+          const history: Message[] = historyData.map((m: { id: string; type: string; message: string; created_at: string }) => ({
+            id: m.id,
+            sender: m.type === 'USER' ? 'user' : 'bot',
+            text: m.message,
+            timestamp: m.created_at,
+          }));
+          setMessages(history);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch messages:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (sessionId) {
+      fetchMessages(sessionId);
+    }
+  }, [sessionId, fetchMessages]);
+
+  const setSessionId = useCallback((id: string) => {
+    setSessionIdState(id);
+    setCookie('sessionId', id);
+  }, []);
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
@@ -54,16 +88,17 @@ export function useChat() {
         throw new Error('Failed to send message');
       }
 
-      const data = await response.json();
+      const json = await response.json();
+      const responseData = json.data || json;
       
-      if (data.sessionId && !sessionId) {
-        setSessionId(data.sessionId);
+      if (responseData.sessionId && !sessionId) {
+        setSessionId(responseData.sessionId);
       }
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: data.reply || "I didn't get a response. Please try again.",
+        text: responseData.reply || "I didn't get a response. Please try again.",
         timestamp: new Date().toISOString(),
       };
 
@@ -83,7 +118,13 @@ export function useChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId]);
+  }, [sessionId, setSessionId]);
+
+  const clearChat = useCallback(() => {
+    setMessages([]);
+    setSessionIdState(null);
+    deleteCookie('sessionId');
+  }, []);
 
   return {
     messages,
@@ -91,5 +132,6 @@ export function useChat() {
     error,
     sendMessage,
     messagesEndRef,
+    clearChat,
   };
 }

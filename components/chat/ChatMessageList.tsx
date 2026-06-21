@@ -9,7 +9,15 @@ interface ChatMessageListProps {
 
 export function ChatMessageList({ messages, isLoading, messagesEndRef }: ChatMessageListProps) {
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50 dark:bg-zinc-950 scroll-smooth">
+    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50 dark:bg-zinc-950 scroll-smooth [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-300 dark:[&::-webkit-scrollbar-thumb]:bg-zinc-700 [&::-webkit-scrollbar-thumb]:rounded-full">
+      {messages.length === 0 && !isLoading && (
+        <div className="flex items-center justify-center mt-24 mb-10 text-center px-6">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-4 py-3 rounded-2xl shadow-sm">
+            Hi there! 👋 I am the E-commerce support agent. How can I help you today?
+          </p>
+        </div>
+      )}
+      
       {messages.map((msg) => {
         const isUser = msg.sender === 'user';
         return (

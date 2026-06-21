@@ -32,23 +32,30 @@ const getMessages = async (
   sessionId: string,
   limit?: number,
 ): Promise<Messages[]> => {
-  if (!sessionId) {
-    return [];
-  }
+  try {
+    if (!sessionId) {
+      return [];
+    }
 
-  const messages = await prisma.messages.findMany({
-    where: {
-      sessionId,
-    },
-    orderBy: {
-      created_at: "desc",
-    },
-    ...(limit ? { take: limit } : {}),
-  });
-  if (limit) {
-    return messages.reverse();
+    const messages = await prisma.messages.findMany({
+      where: {
+        sessionId,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      ...(limit ? { take: limit } : {}),
+    });
+    if (limit) {
+      return messages.reverse();
+    }
+    return messages;
+  } catch (error) {
+    console.error("Message service - getMessages error:", error);
+    throw new Error(
+      `Failed to retrieve messages: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
-  return messages;
 };
 
 const createMessageInDb = async (
@@ -56,15 +63,22 @@ const createMessageInDb = async (
   messageSender: MESSAGE_SENDER,
   sessionId: string,
 ) => {
-  const messageDoc = await prisma.messages.create({
-    data: {
-      message: message,
-      sessionId: sessionId,
-      type: messageSender ?? MESSAGE_SENDER.BOT,
-    },
-  });
+  try {
+    const messageDoc = await prisma.messages.create({
+      data: {
+        message: message,
+        sessionId: sessionId,
+        type: messageSender ?? MESSAGE_SENDER.BOT,
+      },
+    });
 
-  return messageDoc;
+    return messageDoc;
+  } catch (error) {
+    console.error("Message service - createMessageInDb error:", error);
+    throw new Error(
+      `Failed to save message: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 };
 
 export default { createMessage, getMessages, createMessageInDb };
