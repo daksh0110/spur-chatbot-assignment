@@ -11,7 +11,7 @@ import { useChat } from './useChat';
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const { messages, isLoading, error, sendMessage, messagesEndRef } = useChat();
+  const { messages, isLoading, error, sendMessage, messagesEndRef, clearChat } = useChat();
 
   const toggleOpen = () => setIsOpen((prev) => !prev);
 
@@ -19,7 +19,7 @@ export function ChatWidget() {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end sm:bottom-8 sm:right-8">
       {isOpen && (
         <div className="mb-4 flex flex-col w-[350px] sm:w-[380px] h-[550px] max-h-[calc(100vh-120px)] bg-white rounded-2xl shadow-2xl border border-zinc-200 overflow-hidden dark:bg-zinc-950 dark:border-zinc-800 animate-in slide-in-from-bottom-4 fade-in duration-300">
-          <ChatHeader onClose={() => setIsOpen(false)} />
+          <ChatHeader onClose={() => setIsOpen(false)} onClearChat={clearChat} />
           
           {error && (
             <div className="bg-red-50 text-red-600 text-xs px-4 py-2 text-center border-b border-red-100 dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-400">
