@@ -1,7 +1,16 @@
+'use client';
+
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import productsData from "@/app/data/products.json";
+import { useState } from "react";
 
 export default function Home() {
+  const [addedItems, setAddedItems] = useState<Set<number>>(new Set());
+
+  const handleAddToCart = (id: number) => {
+    setAddedItems((prev) => new Set(prev).add(id));
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans">
       <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-40">
@@ -48,8 +57,15 @@ export default function Home() {
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
                   {product.description}
                 </p>
-                <button className="w-full py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-medium rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
-                  Add to Cart
+                <button 
+                  onClick={() => handleAddToCart(product.id)}
+                  className={`w-full py-2.5 font-medium rounded-xl transition-colors ${
+                    addedItems.has(product.id)
+                      ? "bg-green-600 hover:bg-green-700 text-white"
+                      : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200"
+                  }`}
+                >
+                  {addedItems.has(product.id) ? "Added" : "Add to Cart"}
                 </button>
               </div>
             </div>

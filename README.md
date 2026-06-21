@@ -1,6 +1,6 @@
 # Spur - AI Support Chat Agent
 
-A full-stack web application simulating a customer support live chat widget powered by a real LLM. This project was built as part of the founding engineer assignment. 
+A full-stack web application simulating a customer support live chat widget powered by a real LLM. This project was built as part of the founding engineer assignment.
 
 It provides an interactive UI, persists chat sessions so users can reload without losing history, and uses Gemini to answer e-commerce support questions based on a predefined prompt.
 
@@ -19,7 +19,7 @@ It provides an interactive UI, persists chat sessions so users can reload withou
 - **Database**: PostgreSQL (managed via Prisma ORM)
 - **Validation**: Zod
 - **LLM Provider**: Google Gemini (`@google/genai`)
-- **Cache/Rate Limiting**: Upstash Redis 
+- **Cache/Rate Limiting**: Upstash Redis
 
 ---
 
@@ -58,7 +58,7 @@ npx prisma migrate dev
 
 # Generate Prisma Client
 npx prisma generate
-
+```
 
 ### 4. Running Locally
 
@@ -72,11 +72,14 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### 5. Building for Production
 
-To build the application for deployment, run the following command which ensures the Prisma client is generated before the Next.js build:
+To build and run the application in production mode, use the provided npm scripts:
 
 ```bash
-npx prisma generate && npx next build
+npm run build
+npm start
 ```
+
+The `build` script already runs `prisma generate` before `next build`, so this is the complete production setup.
 
 ---
 
@@ -84,15 +87,15 @@ npx prisma generate && npx next build
 
 The app follows a clear separation of concerns, divided into modular layers:
 
-1. **Presentation Layer (Components)**: 
+1. **Presentation Layer (Components)**:
    - `ChatWidget`, `ChatMessageList`, `ChatInputArea`: React components dealing strictly with UI and user interactions.
    - Custom hooks (`useChat.ts`) encapsulate the state logic, API fetching, and cookie handling to keep the components clean.
-2. **API Route Layer**: 
+2. **API Route Layer**:
    - Next.js Route Handlers (`app/api/chat/message/route.ts`) act as controllers. They use **Zod** (`validations/chat.validations.ts`) to strictly validate incoming payloads and return structured JSON responses via utility helpers (`createResponse`, `createError`).
-3. **Service Layer**: 
-   - `gemini.service.ts`: Encapsulates all LLM-specific logic. 
+3. **Service Layer**:
+   - `gemini.service.ts`: Encapsulates all LLM-specific logic.
    - `message.service.ts` & `session.service.ts`: Handles DB operations. This isolates business logic from the routing layer, making it easy to swap providers (e.g., moving from Gemini to Claude) or swap databases.
-4. **Data Access Layer**: 
+4. **Data Access Layer**:
    - Managed entirely by **Prisma**, ensuring type-safety from the DB to the frontend.
 
 ---

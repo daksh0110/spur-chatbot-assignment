@@ -12,6 +12,7 @@ export function useChat() {
     return null;
   });
   const [error, setError] = useState<string | null>(null);
+  const fetchedRef = useRef(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -48,8 +49,9 @@ export function useChat() {
   }, []);
 
   useEffect(() => {
-    if (sessionId) {
+    if (sessionId && !fetchedRef.current) {
       fetchMessages(sessionId);
+      fetchedRef.current = true;
     }
   }, [sessionId, fetchMessages]);
 
